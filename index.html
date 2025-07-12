@@ -1,256 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Quiz and Spelling Bee Competition</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.5;
-      margin: 20px;
-      max-width: 900px;
-    }
-    h1, h2, h3 {
-      color: #2c3e50;
-      margin-bottom: 8px;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-bottom: 20px;
-    }
-    th, td {
-      border: 1px solid #333;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background-color: #ecf0f1;
-    }
-    ol, ul {
-      margin-bottom: 20px;
-      padding-left: 20px;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #ccc;
-      margin: 30px 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz and Spelling Bee Competition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div id="game-container" class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center mb-4">Quiz & Spelling Bee</h1>
+        <div id="start-screen" class="text-center">
+            <p class="mb-4">Welcome to the competition! Click to start.</p>
+            <button id="start-btn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Start Game</button>
+        </div>
+        <div id="game-screen" class="hidden">
+            <p id="current-player" class="text-lg font-semibold mb-2"></p>
+            <p id="current-round" class="text-sm text-gray-600 mb-2"></p>
+            <p id="question" class="mb-4"></p>
+            <input id="answer-input" type="text" class="w-full p-2 border rounded mb-4" placeholder="Type your answer">
+            <button id="submit-btn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Submit</button>
+            <p id="feedback" class="mt-4 text-center"></p>
+        </div>
+        <div id="scoreboard" class="mt-4 hidden">
+            <h2 class="text-xl font-bold">Scores</h2>
+            <ul id="score-list" class="list-disc pl-5"></ul>
+        </div>
+        <div id="result-screen" class="hidden text-center">
+            <h2 class="text-xl font-bold mb-4">Game Over!</h2>
+            <p id="winner-text" class="mb-4"></p>
+            <button id="restart-btn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Play Again</button>
+        </div>
+    </div>
 
-  <h1>Quiz and Spelling Bee Competition</h1>
+    <script>
+        const players = ["Augustine", "Timothy", "Carlos", "Emman", "Dee"];
+        let scores = { Augustine: 0, Timothy: 0, Carlos: 0, Emman: 0, Dee: 0 };
+        const quizQuestions = [
+            { question: "What is 2 + 3?", answer: "5", points: 1 },
+            { question: "Spell the word: APPLE", answer: "APPLE", points: 1 },
+            { question: "What is the capital of France?", answer: "Paris", points: 2 },
+            { question: "Spell the word: KNOWLEDGE", answer: "KNOWLEDGE", points: 3 },
+            { question: "What is 7 x 8?", answer: "56", points: 3 },
+            { question: "Spell the word: BEAUTIFUL", answer: "BEAUTIFUL", points: 3 },
+            { question: "Who wrote 'Romeo and Juliet'?", answer: "Shakespeare", points: 4 },
+            { question: "Spell the word: ACCOMMODATE", answer: "ACCOMMODATE", points: 4 },
+            { question: "What is the largest planet in our solar system?", answer: "Jupiter", points: 3 },
+            { question: "Spell the word: NECESSARY", answer: "NECESSARY", points: 3 }
+        ];
 
-  <h2>Participants and Grades</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Participant</th>
-        <th>Grade</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td>Augustine</td><td>Grade 1</td></tr>
-      <tr><td>Timothy</td><td>Grade 3</td></tr>
-      <tr><td>Carlos</td><td>Grade 5</td></tr>
-      <tr><td>Emman</td><td>Grade 6</td></tr>
-      <tr><td>Dee</td><td>Grade 8</td></tr>
-    </tbody>
-  </table>
+        let currentPlayerIndex = 0;
+        let currentRound = 1;
+        const totalRounds = 3;
+        let currentQuestion = null;
 
-  <hr/>
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
 
-  <h2>Quiz Questions by Participant</h2>
+        function startGame() {
+            document.getElementById("start-screen").classList.add("hidden");
+            document.getElementById("game-screen").classList.remove("hidden");
+            document.getElementById("scoreboard").classList.remove("hidden");
+            shuffle(players);
+            updateScoreboard();
+            nextTurn();
+        }
 
-  <h3>Augustine (Grade 1)</h3>
-  <ol>
-    <li>What is 2 + 3?</li>
-    <li>What color is the sky on a clear day?</li>
-    <li>How many legs does a dog have?</li>
-    <li>What comes next: A, B, __?</li>
-    <li>What shape has three sides?</li>
-    <li>How many fingers are on one hand?</li>
-    <li>What sound does a cat make?</li>
-    <li>What day comes after Monday?</li>
-    <li>Which animal says “moo”?</li>
-    <li>How many wheels does a bicycle have?</li>
-  </ol>
+        function updateScoreboard() {
+            const scoreList = document.getElementById("score-list");
+            scoreList.innerHTML = "";
+            for (const player of players) {
+                const li = document.createElement("li");
+                li.textContent = `${player}: ${scores[player]} points`;
+                scoreList.appendChild(li);
+            }
+        }
 
-  <h3>Timothy (Grade 3)</h3>
-  <ol>
-    <li>What is 7 × 5?</li>
-    <li>What is the capital of your country?</li>
-    <li>How many sides does a hexagon have?</li>
-    <li>Spell the word “friend.”</li>
-    <li>What is 45 ÷ 9?</li>
-    <li>Name the continent where Egypt is located.</li>
-    <li>What is the past tense of “run”?</li>
-    <li>How many minutes are in one hour?</li>
-    <li>Who wrote “Charlotte’s Web”?</li>
-    <li>What do bees make?</li>
-  </ol>
+        function nextTurn() {
+            if (currentRound > totalRounds) {
+                endGame();
+                return;
+            }
+            if (currentPlayerIndex >= players.length) {
+                currentPlayerIndex = 0;
+                currentRound++;
+            }
+            const player = players[currentPlayerIndex];
+            document.getElementById("current-player").textContent = `${player}'s Turn`;
+            document.getElementById("current-round").textContent = `Round ${currentRound} of ${totalRounds}`;
+            currentQuestion = quizQuestions[Math.floor(Math.random() * quizQuestions.length)];
+            document.getElementById("question").textContent = currentQuestion.question;
+            document.getElementById("answer-input").value = "";
+            document.getElementById("feedback").textContent = "";
+            document.getElementById("answer-input").focus();
+        }
 
-  <h3>Carlos (Grade 5)</h3>
-  <ol>
-    <li>Convert ¾ to a decimal.</li>
-    <li>What planet is known as the Red Planet?</li>
-    <li>Who was the first president of the United States?</li>
-    <li>Define the term “ecosystem.”</li>
-    <li>What is 125 ÷ 5?</li>
-    <li>Name two types of renewable energy.</li>
-    <li>What is the largest ocean on Earth?</li>
-    <li>Spell the word “definitely.”</li>
-    <li>What is the opposite of “ancient”?</li>
-    <li>Solve: (8 + 6) × 2.</li>
-  </ol>
+        function checkAnswer() {
+            const answer = document.getElementById("answer-input").value.trim();
+            const feedback = document.getElementById("feedback");
+            const player = players[currentPlayerIndex];
+            if (answer.toLowerCase() === currentQuestion.answer.toLowerCase()) {
+                scores[player] += currentQuestion.points;
+                feedback.textContent = `Correct! +${currentQuestion.points} points`;
+                feedback.classList.add("text-green-600");
+            } else {
+                feedback.textContent = `Wrong! The correct answer is ${currentQuestion.answer}.`;
+                feedback.classList.add("text-red-600");
+            }
+            updateScoreboard();
+            currentPlayerIndex++;
+            setTimeout(nextTurn, 2000);
+        }
 
-  <h3>Emman (Grade 6)</h3>
-  <ol>
-    <li>What is the value of π rounded to two decimal places?</li>
-    <li>Name the process by which plants make food.</li>
-    <li>What is the capital of France?</li>
-    <li>Define “metamorphosis.”</li>
-    <li>Solve for x: 3x + 7 = 22.</li>
-    <li>Name one U.S. state that borders Canada.</li>
-    <li>Spell “hemisphere.”</li>
-    <li>What is the chemical symbol for gold?</li>
-    <li>Who wrote “The Odyssey”?</li>
-    <li>What is 15% of 200?</li>
-  </ol>
+        function endGame() {
+            document.getElementById("game-screen").classList.add("hidden");
+            document.getElementById("result-screen").classList.remove("hidden");
+            const maxScore = Math.max(...Object.values(scores));
+            const winners = players.filter(player => scores[player] === maxScore);
+            const winnerText = winners.length === 1
+                ? `The winner is ${winners[0]} with ${maxScore} points!`
+                : `It's a tie! Winners are ${winners.join(", ")} with ${maxScore} points!`;
+            document.getElementById("winner-text").textContent = winnerText;
+        }
 
-  <h3>Dee (Grade 8)</h3>
-  <ol>
-    <li>Simplify: 5(2x – 3) + 4x.</li>
-    <li>Define “photosynthesis.”</li>
-    <li>Who proposed the theory of relativity?</li>
-    <li>What is the capital of Australia?</li>
-    <li>Solve for y: 2y² – 8 = 0.</li>
-    <li>Name three branches of the United States government.</li>
-    <li>Spell “ubiquitous.”</li>
-    <li>What is the boiling point of water in Celsius?</li>
-    <li>Who wrote “Pride and Prejudice”?</li>
-    <li>What is the value of the slope in the line y = 3x + 2?</li>
-  </ol>
+        function resetGame() {
+            scores = { Augustine: 0, Timothy: 0, Carlos: 0, Emman: 0, Dee: 0 };
+            currentPlayerIndex = 0;
+            currentRound = 1;
+            document.getElementById("result-screen").classList.add("hidden");
+            document.getElementById("start-screen").classList.remove("hidden");
+            document.getElementById("scoreboard").classList.add("hidden");
+        }
 
-  <hr/>
-
-  <h2>Spelling Bee Words by Participant</h2>
-
-  <h3>Augustine (Grade 1)</h3>
-  <ul>
-    <li>cat</li>
-    <li>dog</li>
-    <li>sun</li>
-    <li>tree</li>
-    <li>ball</li>
-    <li>red</li>
-    <li>book</li>
-    <li>fish</li>
-    <li>jump</li>
-    <li>school</li>
-  </ul>
-
-  <h3>Timothy (Grade 3)</h3>
-  <ul>
-    <li>bicycle</li>
-    <li>ocean</li>
-    <li>picture</li>
-    <li>rabbit</li>
-    <li>library</li>
-    <li>surprise</li>
-    <li>special</li>
-    <li>window</li>
-    <li>different</li>
-    <li>animal</li>
-  </ul>
-
-  <h3>Carlos (Grade 5)</h3>
-  <ul>
-    <li>environment</li>
-    <li>geometry</li>
-    <li>achievement</li>
-    <li>decide</li>
-    <li>government</li>
-    <li>respect</li>
-    <li>definitely</li>
-    <li>history</li>
-    <li>science</li>
-    <li>emphasize</li>
-  </ul>
-
-  <h3>Emman (Grade 6)</h3>
-  <ul>
-    <li>volcano</li>
-    <li>microscope</li>
-    <li>equation</li>
-    <li>hemisphere</li>
-    <li>democracy</li>
-    <li>metabolism</li>
-    <li>peninsula</li>
-    <li>algorithm</li>
-    <li>experiment</li>
-    <li>chromatography</li>
-  </ul>
-
-  <h3>Dee (Grade 8)</h3>
-  <ul>
-    <li>bureaucracy</li>
-    <li>renaissance</li>
-    <li>phenomenon</li>
-    <li>hypothetical</li>
-    <li>silhouette</li>
-    <li>ubiquitous</li>
-    <li>eccentricity</li>
-    <li>paradigm</li>
-    <li>exacerbate</li>
-    <li>expedient</li>
-  </ul>
-
-  <hr/>
-
-  <h2>Bonus Round</h2>
-
-  <h3>Bonus Questions (5 points each)</h3>
-  <ol>
-    <li>What year did World War II end?</li>
-    <li>Name the largest planet in our solar system.</li>
-    <li>What is the Pythagorean theorem?</li>
-    <li>Define “democracy.”</li>
-    <li>Who painted the Mona Lisa?</li>
-  </ol>
-
-  <h3>Bonus Spelling Words (5 points each)</h3>
-  <ul>
-    <li>onomatopoeia</li>
-    <li>dichotomy</li>
-    <li>crescendo</li>
-    <li>paradigm</li>
-    <li>miscellaneous</li>
-  </ul>
-
-  <hr/>
-
-  <h2>Scoring Template</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Participant</th>
-        <th>Quiz Score<br/>(out of 10)</th>
-        <th>Spelling Score<br/>(out of 20)</th>
-        <th>Bonus Score<br/>(out of 25)</th>
-        <th>Total Score</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td>Augustine</td><td></td><td></td><td></td><td></td></tr>
-      <tr><td>Timothy</td><td></td><td></td><td></td><td></td></tr>
-      <tr><td>Carlos</td><td></td><td></td><td></td><td></td></tr>
-      <tr><td>Emman</td><td></td><td></td><td></td><td></td></tr>
-      <tr><td>Dee</td><td></td><td></td><td></td><td></td></tr>
-    </tbody>
-  </table>
-
+        document.getElementById("start-btn").addEventListener("click", startGame);
+        document.getElementById("submit-btn").addEventListener("click", checkAnswer);
+        document.getElementById("answer-input").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") checkAnswer();
+        });
+        document.getElementById("restart-btn").addEventListener("click", resetGame);
+    </script>
 </body>
 </html>
