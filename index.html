@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz and Spelling Bee Competition</title>
+    <title>Quiz Competition</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div id="game-container" class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h1 class="text-2xl font-bold text-center mb-4">Quiz & Spelling Bee</h1>
+        <h1 class="text-2xl font-bold text-center mb-4">Quiz Competition</h1>
         <div id="start-screen" class="text-center">
             <p class="mb-4">Welcome to the competition! Click to start.</p>
             <button id="start-btn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Start Game</button>
@@ -18,8 +18,8 @@
             <p id="current-round" class="text-sm text-gray-600 mb-2"></p>
             <p id="question" class="mb-4"></p>
             <div id="answer-area" class="mb-4"></div>
-            <input id="answer-input" type="text" class="w-full p-2 border rounded mb-4" placeholder="Type your answer">
-            <button id="submit-btn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Submit</button>
+            <input id="answer-input" type="text" class="w-full p-2 border rounded mb-4 hidden" placeholder="Type your answer">
+            <button id="submit-btn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 hidden">Submit</button>
             <p id="feedback" class="mt-4 text-center"></p>
         </div>
         <div id="scoreboard" class="mt-4 hidden">
@@ -42,115 +42,52 @@
             { name: "Dee", grade: 0 } // K2 as grade 0
         ];
         let scores = { Augustine: 0, Timothy: 0, Carlos: 0, Emman: 0, Dee: 0 };
+
+        const K2Questions = [
+            { category: "Math", question: "If you have 2 Liberian dollars and your friend gives you 3 more, how many do you have now?", type: "multiple", options: ["4", "5", "6"], answer: "5", points: 1 },
+            { category: "Math", question: "What shape is the Liberian flag?", type: "multiple", options: ["Circle", "Rectangle", "Triangle"], answer: "Rectangle", points: 1 },
+            { category: "General Knowledge", question: "Is Liberia a hot or cold country?", type: "multiple", options: ["Hot", "Cold"], answer: "Hot", points: 1 },
+            { category: "General Knowledge", question: "What do people in Liberia eat a lot of?", type: "multiple", options: ["Rice", "Pizza", "Ice cream"], answer: "Rice", points: 1 }
+        ];
+
+        const grade1Questions = [
+            { category: "Math", question: "If a farmer has 5 chickens and buys 3 more, how many chickens does he have now?", type: "multiple", options: ["7", "8", "9"], answer: "8", points: 1 },
+            { category: "Science", question: "What is the weather like in Liberia during the rainy season?", type: "multiple", options: ["Hot and dry", "Cool and wet", "Snowy"], answer: "Cool and wet", points: 1 },
+            { category: "English", question: "Which word is a noun? A) run B) tree C) quickly", type: "multiple", options: ["A", "B", "C"], answer: "B", points: 1 },
+            { category: "General Knowledge", question: "What is the main language spoken in Liberia?", type: "multiple", options: ["English", "French", "Spanish"], answer: "English", points: 1 }
+        ];
+
+        const grade5_6Questions = [
+            { category: "Math", question: "A market seller in Monrovia sells 15 bunches of plantains. If each bunch costs 20 Liberian dollars, how much money does she make?", type: "open", answer: "300", points: 2 },
+            { category: "Math", question: "What is 12 times 5?", type: "multiple", options: ["50", "60", "70"], answer: "60", points: 2 },
+            { category: "Science", question: "What is the largest rainforest in Liberia?", type: "open", answer: "Sapo National Park", points: 2 },
+            { category: "Science", question: "Which of these is a renewable resource found in Liberia? A) Gold B) Timber C) Oil", type: "multiple", options: ["A", "B", "C"], answer: "B", points: 2 },
+            { category: "History", question: "In what year did Liberia gain independence?", type: "multiple", options: ["1822", "1847", "1900"], answer: "1847", points: 2 },
+            { category: "History", question: "Who was the first president of Liberia?", type: "open", answer: "Joseph Jenkins Roberts", points: 2 },
+            { category: "English", question: "Identify the verb in the sentence: 'The children played football in the park.'", type: "multiple", options: ["children", "played", "park"], answer: "played", points: 2 },
+            { category: "English", question: "What is the meaning of the word 'independence'?", type: "open", answer: "Freedom from control by others", points: 2 },
+            { category: "General Knowledge", question: "What is the currency of Liberia?", type: "multiple", options: ["Dollar", "Euro", "Pound"], answer: "Dollar", points: 2 },
+            { category: "General Knowledge", question: "Name one famous Liberian footballer.", type: "open", answer: "George Weah", points: 2 }
+        ];
+
+        const grade7Questions = [
+            { category: "Math", question: "Solve for x: 3x - 7 = 14", type: "open", answer: "7", points: 3 },
+            { category: "Math", question: "A rectangular plot of land in Liberia measures 10 meters by 15 meters. What is its area?", type: "open", answer: "150", points: 3 },
+            { category: "Science", question: "Why does Liberia have a tropical climate?", type: "open", answer: "Due to its location near the equator", points: 3 },
+            { category: "Science", question: "What is photosynthesis?", type: "open", answer: "The process by which plants make food using sunlight", points: 3 },
+            { category: "History", question: "Describe the significance of the founding of Liberia by freed American slaves.", type: "open", answer: "Established a unique African nation with ties to the U.S.", points: 3 },
+            { category: "History", question: "Who was William V.S. Tubman and what was his contribution to Liberia?", type: "open", answer: "Longest-serving president, modernized the country", points: 3 },
+            { category: "English", question: "What is a synonym for 'liberty'?", type: "open", answer: "Freedom", points: 3 },
+            { category: "English", question: "Identify the subject in the sentence: 'The Liberian flag has red, white, and blue stripes.'", type: "open", answer: "The Liberian flag", points: 3 },
+            { category: "General Knowledge", question: "What is the official language of Liberia?", type: "open", answer: "English", points: 3 },
+            { category: "General Knowledge", question: "Who is the current president of Liberia?", type: "open", answer: "George Weah", points: 3 }
+        ];
+
         const quizQuestions = {
-            K2: [
-                {
-                    question: "What is the main color of Liberia's flag?",
-                    type: "multiple",
-                    options: ["Red", "Blue", "Green"],
-                    answer: "Red",
-                    points: 1
-                },
-                {
-                    question: "Spell the word: STAR",
-                    type: "open",
-                    answer: "STAR",
-                    points: 1
-                },
-                {
-                    question: "What animal lives in Liberia's rainforests? (Hint: It swings in trees)",
-                    type: "multiple",
-                    options: ["Monkey", "Lion", "Elephant"],
-                    answer: "Monkey",
-                    points: 1
-                },
-                {
-                    question: "Spell the word: RICE",
-                    type: "open",
-                    answer: "RICE",
-                    points: 1
-                }
-            ],
-            grade1: [
-                {
-                    question: "What is 3 + 4? (Like counting Liberian dollars)",
-                    type: "open",
-                    answer: "7",
-                    points: 1
-                },
-                {
-                    question: "Spell the word: PALM",
-                    type: "open",
-                    answer: "PALM",
-                    points: 1
-                },
-                {
-                    question: "What is the name of Liberia's capital city?",
-                    type: "multiple",
-                    options: ["Monrovia", "Accra", "Freetown"],
-                    answer: "Monrovia",
-                    points: 1
-                },
-                {
-                    question: "Spell the word: FISH",
-                    type: "open",
-                    answer: "FISH",
-                    points: 1
-                }
-            ],
-            grade5_6: [
-                {
-                    question: "Which Liberian river is one of West Africa’s major rivers?",
-                    type: "open",
-                    answer: "Cav Salamanderalla",
-                    points: 2
-                },
-                {
-                    question: "Spell the word: FREEDOM",
-                    type: "open",
-                    answer: "FREEDOM",
-                    points: 2
-                },
-                {
-                    question: "What is the main staple food in Liberia?",
-                    type: "multiple",
-                    options: ["Rice", "Wheat", "Corn"],
-                    answer: "Rice",
-                    points: 2
-                },
-                {
-                    question: "Spell the word: INDEPENDENCE",
-                    type: "open",
-                    answer: "INDEPENDENCE",
-                    points: 2
-                }
-            ],
-            grade7_8: [
-                {
-                    question: "Which Liberian city is historically known as a port city?",
-                    type: "open",
-                    answer: "Buchanan",
-                    points: 3
-                },
-                {
-                    question: "Spell the word: AMERICO-LIBERIAN",
-                    type: "open",
-                    answer: "AMERICO-LIBERIAN",
-                    points: 3
-                },
-                {
-                    question: "Who was Liberia’s first elected female president?",
-                    type: "open",
-                    answer: "Ellen Johnson Sirleaf",
-                    points: 3
-                },
-                {
-                    question: "Spell the word: MONROVIA",
-                    type: "open",
-                    answer: "MONROVIA",
-                    points: 3
-                }
-            ]
+            K2: K2Questions,
+            grade1: grade1Questions,
+            grade5_6: grade5_6Questions,
+            grade7_8: grade7Questions
         };
 
         let currentPlayerIndex = 0;
@@ -181,9 +118,8 @@
                     shuffledOptions: shuffledOptions,
                     correctLetter: String.fromCharCode(65 + correctIndex)
                 };
-            } else {
-                return question;
             }
+            return question;
         }
 
         function startGame() {
@@ -218,29 +154,31 @@
             document.getElementById("current-player").textContent = `${player.name}'s Turn`;
             document.getElementById("current-round").textContent = `Round ${currentRound} of ${totalRounds}`;
             currentQuestion = getQuestionForPlayer(player.grade);
-            document.getElementById("question").textContent = currentQuestion.question;
+            document.getElementById("question").textContent = `${currentQuestion.category}: ${currentQuestion.question}`;
             const answerArea = document.getElementById("answer-area");
             answerArea.innerHTML = "";
+            const input = document.getElementById("answer-input");
+            const submitBtn = document.getElementById("submit-btn");
             if (currentQuestion.type === "multiple") {
                 currentQuestion.shuffledOptions.forEach((opt, index) => {
                     const button = document.createElement("button");
                     button.textContent = `${String.fromCharCode(65 + index)}) ${opt}`;
                     button.classList.add("bg-gray-200", "p-2", "rounded", "mr-2", "mb-2");
                     button.addEventListener("click", () => {
-                        document.getElementById("answer-input").value = String.fromCharCode(65 + index);
+                        input.value = String.fromCharCode(65 + index);
                         checkAnswer();
                     });
                     answerArea.appendChild(button);
                 });
-                document.getElementById("answer-input").classList.add("hidden");
-                document.getElementById("submit-btn").classList.add("hidden");
+                input.classList.add("hidden");
+                submitBtn.classList.add("hidden");
             } else {
-                document.getElementById("answer-input").classList.remove("hidden");
-                document.getElementById("submit-btn").classList.remove("hidden");
+                input.classList.remove("hidden");
+                submitBtn.classList.remove("hidden");
             }
-            document.getElementById("answer-input").value = "";
+            input.value = "";
             document.getElementById("feedback").textContent = "";
-            document.getElementById("answer-input").focus();
+            input.focus();
         }
 
         function checkAnswer() {
@@ -249,20 +187,16 @@
             const player = players[currentPlayerIndex];
             let correct = false;
             if (currentQuestion.type === "multiple") {
-                if (answer.toUpperCase() === currentQuestion.correctLetter || answer.toLowerCase() === currentQuestion.answer.toLowerCase()) {
-                    correct = true;
-                }
+                correct = answer.toUpperCase() === currentQuestion.correctLetter || answer.toLowerCase() === currentQuestion.answer.toLowerCase();
             } else {
-                if (answer.toLowerCase() === currentQuestion.answer.toLowerCase()) {
-                    correct = true;
-                }
+                correct = answer.toLowerCase() === currentQuestion.answer.toLowerCase();
             }
             if (correct) {
                 scores[player.name] += currentQuestion.points;
                 feedback.textContent = `Correct! +${currentQuestion.points} points`;
                 feedback.classList.add("text-green-600");
             } else {
-                feedback.textContent = `Wrong! The correct answer is ${currentQuestion.answer}.`;
+                feedback.textContent = `Wrong! The correct answer is "${currentQuestion.answer}".`;
                 feedback.classList.add("text-red-600");
             }
             updateScoreboard();
@@ -274,11 +208,10 @@
             document.getElementById("game-screen").classList.add("hidden");
             document.getElementById("result-screen").classList.remove("hidden");
             const maxScore = Math.max(...Object.values(scores));
-            const winners = players.filter(player => scores[player.name] === maxScore).map(p => p.name);
-            const winnerText = winners.length === 1
+            const winners = players.filter(p => scores[p.name] === maxScore).map(p => p.name);
+            document.getElementById("winner-text").textContent = winners.length === 1
                 ? `The winner is ${winners[0]} with ${maxScore} points!`
                 : `It's a tie! Winners are ${winners.join(", ")} with ${maxScore} points!`;
-            document.getElementById("winner-text").textContent = winnerText;
         }
 
         function resetGame() {
