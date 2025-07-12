@@ -17,6 +17,7 @@
             <p id="current-player" class="text-lg font-semibold mb-2"></p>
             <p id="current-round" class="text-sm text-gray-600 mb-2"></p>
             <p id="question" class="mb-4"></p>
+            <div id="answer-area" class="mb-4"></div>
             <input id="answer-input" type="text" class="w-full p-2 border rounded mb-4" placeholder="Type your answer">
             <button id="submit-btn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Submit</button>
             <p id="feedback" class="mt-4 text-center"></p>
@@ -33,20 +34,124 @@
     </div>
 
     <script>
-        const players = ["Augustine", "Timothy", "Carlos", "Emman", "Dee"];
-        let scores = { Augustine: 0, Timothy: 0, Carlos: 0, Emman: 0, Dee: 0 };
-        const quizQuestions = [
-            { question: "What is 2 + 3?", answer: "5", points: 1 },
-            { question: "Spell the word: APPLE", answer: "APPLE", points: 1 },
-            { question: "What is the capital of France?", answer: "Paris", points: 2 },
-            { question: "Spell the word: KNOWLEDGE", answer: "KNOWLEDGE", points: 3 },
-            { question: "What is 7 x 8?", answer: "56", points: 3 },
-            { question: "Spell the word: BEAUTIFUL", answer: "BEAUTIFUL", points: 3 },
-            { question: "Who wrote 'Romeo and Juliet'?", answer: "Shakespeare", points: 4 },
-            { question: "Spell the word: ACCOMMODATE", answer: "ACCOMMODATE", points: 4 },
-            { question: "What is the largest planet in our solar system?", answer: "Jupiter", points: 3 },
-            { question: "Spell the word: NECESSARY", answer: "NECESSARY", points: 3 }
+        const players = [
+            { name: "Augustine", grade: 7 },
+            { name: "Timothy", grade: 6 },
+            { name: "Carlos", grade: 5 },
+            { name: "Emman", grade: 1 },
+            { name: "Dee", grade: 0 } // K2 as grade 0
         ];
+        let scores = { Augustine: 0, Timothy: 0, Carlos: 0, Emman: 0, Dee: 0 };
+        const quizQuestions = {
+            K2: [
+                {
+                    question: "What is the main color of Liberia's flag?",
+                    type: "multiple",
+                    options: ["Red", "Blue", "Green"],
+                    answer: "Red",
+                    points: 1
+                },
+                {
+                    question: "Spell the word: STAR",
+                    type: "open",
+                    answer: "STAR",
+                    points: 1
+                },
+                {
+                    question: "What animal lives in Liberia's rainforests? (Hint: It swings in trees)",
+                    type: "multiple",
+                    options: ["Monkey", "Lion", "Elephant"],
+                    answer: "Monkey",
+                    points: 1
+                },
+                {
+                    question: "Spell the word: RICE",
+                    type: "open",
+                    answer: "RICE",
+                    points: 1
+                }
+            ],
+            grade1: [
+                {
+                    question: "What is 3 + 4? (Like counting Liberian dollars)",
+                    type: "open",
+                    answer: "7",
+                    points: 1
+                },
+                {
+                    question: "Spell the word: PALM",
+                    type: "open",
+                    answer: "PALM",
+                    points: 1
+                },
+                {
+                    question: "What is the name of Liberia's capital city?",
+                    type: "multiple",
+                    options: ["Monrovia", "Accra", "Freetown"],
+                    answer: "Monrovia",
+                    points: 1
+                },
+                {
+                    question: "Spell the word: FISH",
+                    type: "open",
+                    answer: "FISH",
+                    points: 1
+                }
+            ],
+            grade5_6: [
+                {
+                    question: "Which Liberian river is one of West Africa’s major rivers?",
+                    type: "open",
+                    answer: "Cav Salamanderalla",
+                    points: 2
+                },
+                {
+                    question: "Spell the word: FREEDOM",
+                    type: "open",
+                    answer: "FREEDOM",
+                    points: 2
+                },
+                {
+                    question: "What is the main staple food in Liberia?",
+                    type: "multiple",
+                    options: ["Rice", "Wheat", "Corn"],
+                    answer: "Rice",
+                    points: 2
+                },
+                {
+                    question: "Spell the word: INDEPENDENCE",
+                    type: "open",
+                    answer: "INDEPENDENCE",
+                    points: 2
+                }
+            ],
+            grade7_8: [
+                {
+                    question: "Which Liberian city is historically known as a port city?",
+                    type: "open",
+                    answer: "Buchanan",
+                    points: 3
+                },
+                {
+                    question: "Spell the word: AMERICO-LIBERIAN",
+                    type: "open",
+                    answer: "AMERICO-LIBERIAN",
+                    points: 3
+                },
+                {
+                    question: "Who was Liberia’s first elected female president?",
+                    type: "open",
+                    answer: "Ellen Johnson Sirleaf",
+                    points: 3
+                },
+                {
+                    question: "Spell the word: MONROVIA",
+                    type: "open",
+                    answer: "MONROVIA",
+                    points: 3
+                }
+            ]
+        };
 
         let currentPlayerIndex = 0;
         let currentRound = 1;
@@ -57,6 +162,27 @@
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function getQuestionForPlayer(grade) {
+            let questionSet;
+            if (grade === 0) questionSet = quizQuestions.K2;
+            else if (grade === 1) questionSet = quizQuestions.grade1;
+            else if (grade === 5 || grade === 6) questionSet = quizQuestions.grade5_6;
+            else questionSet = quizQuestions.grade7_8;
+            let question = questionSet[Math.floor(Math.random() * questionSet.length)];
+            if (question.type === "multiple") {
+                let shuffledOptions = [...question.options];
+                shuffle(shuffledOptions);
+                let correctIndex = shuffledOptions.indexOf(question.answer);
+                return {
+                    ...question,
+                    shuffledOptions: shuffledOptions,
+                    correctLetter: String.fromCharCode(65 + correctIndex)
+                };
+            } else {
+                return question;
             }
         }
 
@@ -74,7 +200,7 @@
             scoreList.innerHTML = "";
             for (const player of players) {
                 const li = document.createElement("li");
-                li.textContent = `${player}: ${scores[player]} points`;
+                li.textContent = `${player.name}: ${scores[player.name]} points`;
                 scoreList.appendChild(li);
             }
         }
@@ -89,10 +215,29 @@
                 currentRound++;
             }
             const player = players[currentPlayerIndex];
-            document.getElementById("current-player").textContent = `${player}'s Turn`;
+            document.getElementById("current-player").textContent = `${player.name}'s Turn`;
             document.getElementById("current-round").textContent = `Round ${currentRound} of ${totalRounds}`;
-            currentQuestion = quizQuestions[Math.floor(Math.random() * quizQuestions.length)];
+            currentQuestion = getQuestionForPlayer(player.grade);
             document.getElementById("question").textContent = currentQuestion.question;
+            const answerArea = document.getElementById("answer-area");
+            answerArea.innerHTML = "";
+            if (currentQuestion.type === "multiple") {
+                currentQuestion.shuffledOptions.forEach((opt, index) => {
+                    const button = document.createElement("button");
+                    button.textContent = `${String.fromCharCode(65 + index)}) ${opt}`;
+                    button.classList.add("bg-gray-200", "p-2", "rounded", "mr-2", "mb-2");
+                    button.addEventListener("click", () => {
+                        document.getElementById("answer-input").value = String.fromCharCode(65 + index);
+                        checkAnswer();
+                    });
+                    answerArea.appendChild(button);
+                });
+                document.getElementById("answer-input").classList.add("hidden");
+                document.getElementById("submit-btn").classList.add("hidden");
+            } else {
+                document.getElementById("answer-input").classList.remove("hidden");
+                document.getElementById("submit-btn").classList.remove("hidden");
+            }
             document.getElementById("answer-input").value = "";
             document.getElementById("feedback").textContent = "";
             document.getElementById("answer-input").focus();
@@ -102,8 +247,18 @@
             const answer = document.getElementById("answer-input").value.trim();
             const feedback = document.getElementById("feedback");
             const player = players[currentPlayerIndex];
-            if (answer.toLowerCase() === currentQuestion.answer.toLowerCase()) {
-                scores[player] += currentQuestion.points;
+            let correct = false;
+            if (currentQuestion.type === "multiple") {
+                if (answer.toUpperCase() === currentQuestion.correctLetter || answer.toLowerCase() === currentQuestion.answer.toLowerCase()) {
+                    correct = true;
+                }
+            } else {
+                if (answer.toLowerCase() === currentQuestion.answer.toLowerCase()) {
+                    correct = true;
+                }
+            }
+            if (correct) {
+                scores[player.name] += currentQuestion.points;
                 feedback.textContent = `Correct! +${currentQuestion.points} points`;
                 feedback.classList.add("text-green-600");
             } else {
@@ -119,7 +274,7 @@
             document.getElementById("game-screen").classList.add("hidden");
             document.getElementById("result-screen").classList.remove("hidden");
             const maxScore = Math.max(...Object.values(scores));
-            const winners = players.filter(player => scores[player] === maxScore);
+            const winners = players.filter(player => scores[player.name] === maxScore).map(p => p.name);
             const winnerText = winners.length === 1
                 ? `The winner is ${winners[0]} with ${maxScore} points!`
                 : `It's a tie! Winners are ${winners.join(", ")} with ${maxScore} points!`;
